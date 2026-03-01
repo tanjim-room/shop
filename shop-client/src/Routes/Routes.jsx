@@ -10,6 +10,9 @@ import Home from '../pages/Home';
 import Cart from '../pages/Cart';
 import AdminOrders from '../pages/AdminOrders';
 import AdminProducts from '../pages/AdminProducts';
+import ProductDetails from '../pages/ProductDetails';
+import ProtectedAdminRoute from '../components/ProtectedAdminRoute';
+import OrderSuccess from '../pages/OrderSuccess';
 
 export const router = createBrowserRouter([
     {
@@ -25,8 +28,16 @@ export const router = createBrowserRouter([
                 element: <Products></Products>
             },
             {
+                path: '/products/:id',
+                element: <ProductDetails></ProductDetails>
+            },
+            {
                 path: '/cart',
                 element: <Cart></Cart>
+            },
+            {
+                path: '/order-success/:orderId',
+                element: <OrderSuccess></OrderSuccess>
             }
         ]
     },
@@ -36,7 +47,7 @@ export const router = createBrowserRouter([
     },
     {
         path: 'admin',
-        element: <AdminLayout></AdminLayout>,
+        element: <ProtectedAdminRoute><AdminLayout></AdminLayout></ProtectedAdminRoute>,
         children: [
             {
                 path: 'dashboard',

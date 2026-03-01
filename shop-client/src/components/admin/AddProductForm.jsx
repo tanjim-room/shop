@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Package, List, ImagePlus, Loader2, Banknote } from 'lucide-react';
-import { API_BASE_URL, uploadMultipleImagesToImgbb } from '../../lib/api';
+import { Package, List, ImagePlus, Loader2, Banknote, PlusCircle, Trash2 } from 'lucide-react';
+import { adminApiFetch, uploadMultipleImagesToImgbb } from '../../lib/api';
+import Swal from 'sweetalert2';
 
 const AddProductForm = () => {
   const [loading, setLoading] = useState(false);
@@ -36,6 +37,12 @@ const AddProductForm = () => {
       }));
     } catch (uploadError) {
       setError(uploadError.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Upload failed',
+        text: uploadError.message,
+        confirmButtonColor: '#C7A64A',
+      });
     } finally {
       setImageUploading(false);
       e.target.value = '';
@@ -56,11 +63,8 @@ const AddProductForm = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/products`, {
+      const response = await adminApiFetch('/api/products', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           ...product,
           price: Number(product.price),
@@ -75,6 +79,12 @@ const AddProductForm = () => {
       }
 
       setSuccess('Product added successfully!');
+      Swal.fire({
+        icon: 'success',
+        title: 'Product added',
+        text: 'The product was added successfully.',
+        confirmButtonColor: '#C7A64A',
+      });
       setProduct({
         name: '',
         description: '',
@@ -85,6 +95,12 @@ const AddProductForm = () => {
       });
     } catch (submitError) {
       setError(submitError.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Add failed',
+        text: submitError.message,
+        confirmButtonColor: '#C7A64A',
+      });
     } finally {
       setLoading(false);
     }
@@ -92,8 +108,8 @@ const AddProductForm = () => {
 
   return (
    <div className='flex items-center justify-center p-6'>
-     <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-slate-900">
-      <h2 className="text-2xl font-bold text-slate-800 mb-6">Add New Product</h2>
+    <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-brand-gold/30 p-8 text-slate-900">
+     <h2 className="text-2xl font-bold text-brand-ink mb-6">Add New Product</h2>
       
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
@@ -107,7 +123,7 @@ const AddProductForm = () => {
               type="text"
               required
               value={product.name}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-gold focus:outline-none text-black"
               placeholder="e.g. Royal Oud Intense"
               onChange={handleChange}
             /> 
@@ -127,7 +143,7 @@ const AddProductForm = () => {
       name="category"
       value={product.category}
       placeholder="Select or type a category"
-      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
+      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-gold focus:outline-none text-black"
       onChange={handleChange}
     />
 
@@ -151,7 +167,7 @@ const AddProductForm = () => {
               min="1"
               required
               value={product.price}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-gold focus:outline-none text-black"
               placeholder="0.00"
               onChange={handleChange}
             />
@@ -165,7 +181,7 @@ const AddProductForm = () => {
             type="number"
             min="0"
             value={product.stock}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
+            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-gold focus:outline-none text-black"
             placeholder="0"
             onChange={handleChange}
           />
@@ -178,7 +194,7 @@ const AddProductForm = () => {
             name="description"
             rows="4"
             value={product.description}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
+            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-gold focus:outline-none text-black"
             placeholder="Describe the products..."
             onChange={handleChange}
           ></textarea>
@@ -194,7 +210,7 @@ const AddProductForm = () => {
             className="mt-3 file-input file-input-bordered w-full text-slate-700"
             onChange={handleImageUpload}
           />
-          {imageUploading && <p className="text-sm text-blue-600 mt-2">Uploading images...</p>}
+          {imageUploading && <p className="text-sm text-brand-gold mt-2">Uploading images...</p>}
           {product.imageUrls.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
               {product.imageUrls.map((url) => (
@@ -207,8 +223,9 @@ const AddProductForm = () => {
                   <button
                     type="button"
                     onClick={() => removeImage(url)}
-                    className="absolute top-1 right-1 text-xs px-2 py-1 rounded bg-black/70 text-white"
+                    className="absolute top-1 right-1 text-xs px-2 py-1 rounded bg-red-600/90 text-white inline-flex items-center gap-1"
                   >
+                    <Trash2 size={12} />
                     Remove
                   </button>
                 </div>
@@ -229,9 +246,10 @@ const AddProductForm = () => {
           <button
             type="submit"
             disabled={loading || imageUploading}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all active:scale-[0.98] disabled:bg-blue-400"
+            className="w-full inline-flex items-center justify-center gap-2 bg-brand-gold hover:bg-brand-ink text-brand-ink hover:text-white font-semibold py-3 px-6 rounded-lg transition-all active:scale-[0.98] disabled:bg-slate-300"
           >
-            {loading ? <Loader2 className="animate-spin" /> : "Add Product"}
+            {loading ? <Loader2 className="animate-spin" /> : <PlusCircle size={18} />}
+            {loading ? 'Adding...' : 'Add Product'}
           </button>
         </div>
       </form>

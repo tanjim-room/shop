@@ -2,6 +2,7 @@ const { getDB } = require('../config/db');
 const { ObjectId } = require('mongodb');
 
 const ordersCollection = 'orders';
+const DELIVERY_CHARGE = 80;
 
 function normalizeOrder(body = {}) {
   const normalizedItems = Array.isArray(body.items)
@@ -16,7 +17,9 @@ function normalizeOrder(body = {}) {
         .filter((item) => item.productId && item.name && item.price > 0 && item.quantity > 0)
     : [];
 
-  const totalAmount = normalizedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = normalizedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const deliveryCharge = normalizedItems.length ? DELIVERY_CHARGE : 0;
+  const totalAmount = subtotal + deliveryCharge;
 
   return {
     customerName: String(body.customerName || '').trim(),
@@ -24,6 +27,8 @@ function normalizeOrder(body = {}) {
     shippingAddress: String(body.shippingAddress || '').trim(),
     notes: String(body.notes || '').trim(),
     items: normalizedItems,
+    subtotal,
+    deliveryCharge,
     totalAmount,
   };
 }
@@ -47,9 +52,13 @@ async function createOrder(req, res) {
 
     const db = getDB();
     const now = new Date();
+    const orderId = new ObjectId();
+    const orderNumber = `PF-${orderId.toString().slice(-10).toUpperCase()}`;
 
     const order = {
+      _id: orderId,
       ...normalizedOrder,
+      orderNumber,
       status: 'pending',
       createdAt: now,
       updatedAt: now,
@@ -57,12 +66,40 @@ async function createOrder(req, res) {
 
     const result = await db.collection(ordersCollection).insertOne(order);
 
+    const responseOrder = {
+      ...order,
+      _id: orderId.toString(),
+    };
+
     return res.status(201).json({
       message: 'Order placed successfully',
-      insertedId: result.insertedId,
+      insertedId: orderId.toString(),
+      orderNumber,
+      order: responseOrder,
     });
   } catch (error) {
     return res.status(500).json({ message: 'Failed to create order', error: error.message });
+  }
+}
+
+async function getPublicOrderById(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid order id' });
+    }
+
+    const db = getDB();
+    const order = await db.collection(ordersCollection).findOne({ _id: new ObjectId(id) });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    return res.status(200).json(order);
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to fetch order', error: error.message });
   }
 }
 
@@ -142,6 +179,7 @@ async function getAdminStats(req, res) {
 
 module.exports = {
   createOrder,
+  getPublicOrderById,
   getOrders,
   updateOrderStatus,
   getAdminStats,

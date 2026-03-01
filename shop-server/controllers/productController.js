@@ -73,6 +73,26 @@ async function getProducts(req, res) {
   }
 }
 
+async function getProductById(req, res) {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid product id' });
+    }
+
+    const db = getDB();
+    const product = await db.collection(collectionName).findOne({ _id: new ObjectId(id) });
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    return res.status(200).json(product);
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to fetch product', error: error.message });
+  }
+}
+
 async function deleteProduct(req, res) {
   try {
     const { id } = req.params;
@@ -93,8 +113,46 @@ async function deleteProduct(req, res) {
   }
 }
 
+async function updateProduct(req, res) {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid product id' });
+    }
+
+    const product = normalizeProduct(req.body);
+    const validationError = validateProduct(product);
+
+    if (validationError) {
+      return res.status(400).json({ message: validationError });
+    }
+
+    const db = getDB();
+    const result = await db.collection(collectionName).updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          ...product,
+          imageUrl: product.imageUrls[0] || '',
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    if (!result.matchedCount) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    return res.status(200).json({ message: 'Product updated successfully' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to update product', error: error.message });
+  }
+}
+
 module.exports = {
   createProduct,
   getProducts,
+  getProductById,
+  updateProduct,
   deleteProduct,
 };

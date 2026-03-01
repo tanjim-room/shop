@@ -3,9 +3,10 @@ import AddProductForm from '../components/admin/AddProductForm';
 
 const AddProduct = () => {
     return (
-        <div>
+        <section className='space-y-4 text-slate-800'>
+            <h2 className='text-2xl font-bold text-brand-ink'>Add Product</h2>
             <AddProductForm></AddProductForm>
-        </div>
+        </section>
     );
 };
 

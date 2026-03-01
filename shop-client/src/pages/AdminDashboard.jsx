@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { API_BASE_URL } from '../lib/api';
+import { adminApiFetch } from '../lib/api';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
@@ -13,7 +13,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         const loadStats = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/orders/admin/stats`);
+                const response = await adminApiFetch('/api/orders/admin/stats');
                 if (!response.ok) {
                     throw new Error('Failed to load stats');
                 }
@@ -30,28 +30,28 @@ const AdminDashboard = () => {
     }, []);
 
     if (loading) {
-        return <div className='p-6'>Loading dashboard...</div>;
+        return <div className='text-slate-600'>Loading dashboard...</div>;
     }
 
     return (
-        <section className='p-6 max-w-7xl text-slate-800'>
-            <h2 className='text-2xl font-bold mb-6 text-slate-900'>Admin Dashboard</h2>
+        <section className='space-y-6 text-slate-800'>
+            <h2 className='text-3xl font-bold mb-6 text-brand-ink'>Admin Dashboard</h2>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
-                <div className='bg-white rounded-xl p-5 border border-slate-200 shadow-sm'>
-                    <p className='text-slate-500'>Products</p>
-                    <h3 className='text-2xl font-bold'>{stats.totalProducts}</h3>
+                <div className='bg-white rounded-xl p-5 border border-brand-gold/40 shadow-sm'>
+                    <p className='text-slate-600 font-medium'>Products</p>
+                    <h3 className='text-2xl font-bold text-brand-gold'>{stats.totalProducts}</h3>
                 </div>
-                <div className='bg-white rounded-xl p-5 border border-slate-200 shadow-sm'>
-                    <p className='text-slate-500'>Orders</p>
-                    <h3 className='text-2xl font-bold'>{stats.totalOrders}</h3>
+                <div className='bg-white rounded-xl p-5 border border-brand-gold/40 shadow-sm'>
+                    <p className='text-slate-600 font-medium'>Orders</p>
+                    <h3 className='text-2xl font-bold text-brand-gold'>{stats.totalOrders}</h3>
                 </div>
-                <div className='bg-white rounded-xl p-5 border border-slate-200 shadow-sm'>
-                    <p className='text-slate-500'>Pending Orders</p>
-                    <h3 className='text-2xl font-bold'>{stats.pendingOrders}</h3>
+                <div className='bg-white rounded-xl p-5 border border-brand-gold/40 shadow-sm'>
+                    <p className='text-slate-600 font-medium'>Pending Orders</p>
+                    <h3 className='text-2xl font-bold text-brand-gold'>{stats.pendingOrders}</h3>
                 </div>
-                <div className='bg-white rounded-xl p-5 border border-slate-200 shadow-sm'>
-                    <p className='text-slate-500'>Revenue</p>
-                    <h3 className='text-2xl font-bold'>Tk {stats.totalRevenue}</h3>
+                <div className='bg-white rounded-xl p-5 border border-brand-gold/40 shadow-sm'>
+                    <p className='text-slate-600 font-medium'>Revenue</p>
+                    <h3 className='text-2xl font-bold text-brand-gold'>Tk {stats.totalRevenue}</h3>
                 </div>
             </div>
         </section>

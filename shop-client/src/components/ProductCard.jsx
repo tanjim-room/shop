@@ -1,10 +1,11 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product, onAddToCart }) => {
   const imageUrl = product.imageUrls?.[0] || product.imageUrl || 'https://placehold.co/600x400?text=No+Image';
 
   return (
-    <article className="group h-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col">
+    <article className="group h-full bg-white border border-brand-gold/30 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col">
       <div className="relative overflow-hidden">
         <img
           src={imageUrl}
@@ -24,24 +25,32 @@ const ProductCard = ({ product, onAddToCart }) => {
         <p className="text-sm text-slate-600 min-h-10 line-clamp-2">{product.description || 'No description available.'}</p>
 
         <div className="flex items-center justify-between pt-1">
-          <span className="text-lg font-bold text-blue-700">Tk {product.price}</span>
+          <span className="text-lg font-bold text-brand-gold">Tk {product.price}</span>
           <span className="text-sm text-slate-500">Stock: {product.stock}</span>
         </div>
 
-        <button
-          type="button"
-          className="btn btn-primary btn-sm w-full mt-auto"
-          onClick={() =>
-            onAddToCart({
-              productId: product._id,
-              name: product.name,
-              price: Number(product.price),
-              imageUrl,
-            })
-          }
-        >
-          Add to Cart
-        </button>
+        <div className="mt-auto grid grid-cols-2 gap-2">
+          <Link
+            to={`/products/${product._id}`}
+            className="btn btn-sm border-brand-gold text-white hover:bg-brand-soft hover:text-brand-gold"
+          >
+            Details
+          </Link>
+          <button
+            type="button"
+            className="btn btn-sm bg-brand-gold border-brand-gold text-brand-ink hover:bg-brand-ink hover:border-brand-ink hover:text-brand-gold"
+            onClick={() =>
+              onAddToCart({
+                productId: product._id,
+                name: product.name,
+                price: Number(product.price),
+                imageUrl,
+              })
+            }
+          >
+            Add to Cart
+          </button>
+        </div>
       </div>
     </article>
   );

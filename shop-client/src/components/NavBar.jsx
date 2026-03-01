@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { ShoppingCart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const NavBar = () => {
@@ -11,7 +12,7 @@ const NavBar = () => {
         { name: 'Cart', path: '/cart' }
     ];
     return (
-        <div className="navbar bg-white/95 border-b border-slate-200 shadow-sm fixed top-0 left-0 w-full z-10">
+        <div className="navbar bg-white/95 border-b border-brand-gold/30 shadow-sm fixed top-0 left-0 w-full z-10">
             <div className='max-w-7xl mx-auto w-full px-4 flex items-center justify-between'>
             <div className="navbar-start">
                 <div className="dropdown">
@@ -22,23 +23,38 @@ const NavBar = () => {
                         tabIndex="-1"
                         className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
                         {
-                            navLinks.map((link) => <li key={link.name}><NavLink to={link.path}>{link.name}</NavLink></li>)
+                            navLinks.map((link) => (
+                                <li key={link.name}>
+                                    <NavLink to={link.path} className={({ isActive }) => isActive ? 'text-brand-gold font-semibold' : 'text-brand-ink'}>{link.name}</NavLink>
+                                </li>
+                            ))
                         }
 
                     </ul>
                 </div>
-                <a className="btn btn-ghost text-xl text-slate-800">Attar Shop</a>
+                <a className="btn btn-ghost bg-brand-gold text-xl text-brand-ink hover:text-brand-gold hover:bg-black ">PREMIUM FRAGRANCE</a>
             </div>
             <div className="navbar-center hidden lg:flex">
                 <ul className="menu menu-horizontal px-1">
                     {
-                        navLinks.map((link) => <li key={link.name}><NavLink to={link.path}>{link.name}</NavLink></li>)
+                        navLinks.map((link) => (
+                            <li key={link.name}>
+                                <NavLink to={link.path} className={({ isActive }) => isActive ? 'text-brand-gold font-semibold' : 'text-brand-ink'}>{link.name}</NavLink>
+                            </li>
+                        ))
                     }
                 </ul>
             </div>
             <div className="navbar-end">
-                <NavLink to="/admin/dashboard" className="btn btn-outline">Admin</NavLink>
-                <div className="badge badge-primary ml-2">{itemCount}</div>
+                {/* <NavLink to="/admin/dashboard" className="btn btn-outline border-brand-gold text-brand-ink hover:bg-brand-gold hover:border-brand-gold">Admin</NavLink> */}
+                <NavLink
+                    to="/cart"
+                    className="btn btn-ghost text-brand-ink hover:text-brand-gold"
+                    aria-label="Cart"
+                >
+                    <ShoppingCart size={22} />
+                </NavLink>
+                <div className="badge ml-2 bg-brand-gold text-brand-ink border-0">{itemCount}</div>
             </div>
             </div>
         </div>
