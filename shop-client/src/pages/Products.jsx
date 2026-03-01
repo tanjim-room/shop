@@ -1,33 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { API_BASE_URL } from '../lib/api';
 import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
+import useBackendData from '../hooks/useBackendData';
 
 const Products = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const { addToCart } = useCart();
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setError('');
-        const response = await fetch(`${API_BASE_URL}/api/products`);
-        if (!response.ok) {
-          throw new Error('Failed to load products');
-        }
-        const data = await response.json();
-        setProducts(data);
-      } catch (loadError) {
-        setError(loadError.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProducts();
+  const loadProducts = useCallback(async () => {
+    const response = await fetch(`${API_BASE_URL}/api/products`);
+    if (!response.ok) {
+      throw new Error('Failed to load products');
+    }
+    return response.json();
   }, []);
+
+  const {
+    data: products = [],
+    loading,
+    error,
+  } = useBackendData({
+    loader: loadProducts,
+    initialData: [],
+  });
 
   if (loading) {
     return <div className="max-w-7xl mx-auto p-6">Loading products...</div>;

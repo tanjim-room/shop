@@ -1,4 +1,8 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const FALLBACK_API_BASE_URL = import.meta.env.PROD
+	? 'https://shop-server-lemon.vercel.app'
+	: 'http://localhost:8000';
+
+export const API_BASE_URL = import.meta.env.VITE_API_URL || FALLBACK_API_BASE_URL;
 export const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || '714b4ad18d0cf4ce255329888f21797d';
 export const ADMIN_TOKEN_KEY = 'admin_access_token';
 

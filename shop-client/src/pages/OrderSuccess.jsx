@@ -1,37 +1,33 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { API_BASE_URL } from '../lib/api';
+import useBackendData from '../hooks/useBackendData';
 
 const OrderSuccess = () => {
   const location = useLocation();
   const { orderId } = useParams();
-  const [order, setOrder] = useState(location.state?.order || null);
-  const [loading, setLoading] = useState(!location.state?.order);
-  const [error, setError] = useState('');
+  const stateOrder = location.state?.order || null;
 
-  useEffect(() => {
-    const loadOrder = async () => {
-      if (order) return;
+  const loadOrder = useCallback(async () => {
+    const response = await fetch(`${API_BASE_URL}/api/orders/public/${orderId}`);
+    const data = await response.json();
 
-      try {
-        setError('');
-        const response = await fetch(`${API_BASE_URL}/api/orders/public/${orderId}`);
-        const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.message || 'Failed to load order details');
+    }
 
-        if (!response.ok) {
-          throw new Error(data?.message || 'Failed to load order details');
-        }
+    return data;
+  }, [orderId]);
 
-        setOrder(data);
-      } catch (loadError) {
-        setError(loadError.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadOrder();
-  }, [order, orderId]);
+  const {
+    data: order,
+    loading,
+    error,
+  } = useBackendData({
+    loader: loadOrder,
+    initialData: stateOrder,
+    enabled: !stateOrder,
+  });
 
   const formattedDate = useMemo(() => {
     if (!order?.createdAt) return '-';

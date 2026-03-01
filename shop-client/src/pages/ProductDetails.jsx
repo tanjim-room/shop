@@ -1,41 +1,40 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { API_BASE_URL } from '../lib/api';
 import { useCart } from '../context/CartContext';
+import useBackendData from '../hooks/useBackendData';
 
 const ProductDetails = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
-  const [product, setProduct] = useState(null);
   const [activeImage, setActiveImage] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+
+  const loadProduct = useCallback(async () => {
+    const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data?.message || 'Failed to load product');
+    }
+
+    return data;
+  }, [id]);
+
+  const {
+    data: product,
+    loading,
+    error,
+  } = useBackendData({
+    loader: loadProduct,
+    initialData: null,
+  });
 
   useEffect(() => {
-    const loadProduct = async () => {
-      try {
-        setError('');
-        setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data?.message || 'Failed to load product');
-        }
-
-        setProduct(data);
-        const firstImage = data?.imageUrls?.[0] || data?.imageUrl || 'https://placehold.co/800x600?text=No+Image';
-        setActiveImage(firstImage);
-      } catch (loadError) {
-        setError(loadError.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProduct();
-  }, [id]);
+    if (!product) return;
+    const firstImage = product?.imageUrls?.[0] || product?.imageUrl || 'https://placehold.co/800x600?text=No+Image';
+    setActiveImage(firstImage);
+  }, [product]);
 
   const galleryImages = useMemo(() => {
     if (!product) return [];

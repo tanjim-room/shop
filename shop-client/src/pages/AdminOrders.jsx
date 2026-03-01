@@ -1,36 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { adminApiFetch } from '../lib/api';
 import OrderEditActions from '../components/admin/OrderEditActions';
 import OrderDetailsPanel from '../components/admin/OrderDetailsPanel';
+import useBackendData from '../hooks/useBackendData';
 
 const statuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
 
 const AdminOrders = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [expandedOrderId, setExpandedOrderId] = useState('');
 
-  const loadOrders = async () => {
-    try {
-      setError('');
-      const response = await adminApiFetch('/api/orders');
-      if (!response.ok) throw new Error('Failed to load orders');
-      const data = await response.json();
-      setOrders(data);
-    } catch (loadError) {
-      setError(loadError.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadOrders();
+  const loadOrders = useCallback(async () => {
+    const response = await adminApiFetch('/api/orders');
+    if (!response.ok) throw new Error('Failed to load orders');
+    return response.json();
   }, []);
+
+  const {
+    data: orders = [],
+    setData: setOrders,
+    loading,
+    error,
+  } = useBackendData({
+    loader: loadOrders,
+    initialData: [],
+  });
+
+  const [actionError, setActionError] = useState('');
 
   const updateStatus = async (orderId, status) => {
     try {
+      setActionError('');
       const response = await adminApiFetch(`/api/orders/${orderId}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status }),
@@ -46,7 +45,7 @@ const AdminOrders = () => {
       );
       return true;
     } catch (statusError) {
-      setError(statusError.message);
+      setActionError(statusError.message);
       return false;
     }
   };
@@ -58,7 +57,7 @@ const AdminOrders = () => {
   return (
     <section className="space-y-4 text-slate-800">
       <h2 className="text-2xl font-bold mb-4 text-slate-900">Manage Orders</h2>
-      {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
+      {(error || actionError) && <p className="text-red-600 text-sm mb-3">{actionError || error}</p>}
 
       <div className="overflow-x-auto bg-white rounded-xl border border-brand-gold/40 shadow-sm">
         <table className="table">

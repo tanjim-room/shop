@@ -1,36 +1,42 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { adminApiFetch } from '../lib/api';
+import useBackendData from '../hooks/useBackendData';
 
 const AdminDashboard = () => {
-    const [stats, setStats] = useState({
-        totalProducts: 0,
-        totalOrders: 0,
-        pendingOrders: 0,
-        totalRevenue: 0,
-    });
-    const [loading, setLoading] = useState(true);
+    const loadStats = useCallback(async () => {
+        const response = await adminApiFetch('/api/orders/admin/stats');
+        if (!response.ok) {
+            throw new Error('Failed to load stats');
+        }
 
-    useEffect(() => {
-        const loadStats = async () => {
-            try {
-                const response = await adminApiFetch('/api/orders/admin/stats');
-                if (!response.ok) {
-                    throw new Error('Failed to load stats');
-                }
-                const data = await response.json();
-                setStats(data);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadStats();
+        return response.json();
     }, []);
+
+    const {
+        data: stats = {
+            totalProducts: 0,
+            totalOrders: 0,
+            pendingOrders: 0,
+            totalRevenue: 0,
+        },
+        loading,
+        error,
+    } = useBackendData({
+        loader: loadStats,
+        initialData: {
+            totalProducts: 0,
+            totalOrders: 0,
+            pendingOrders: 0,
+            totalRevenue: 0,
+        },
+    });
 
     if (loading) {
         return <div className='text-slate-600'>Loading dashboard...</div>;
+    }
+
+    if (error) {
+        return <div className='text-red-600'>{error}</div>;
     }
 
     return (

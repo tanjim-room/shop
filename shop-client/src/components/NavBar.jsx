@@ -25,36 +25,36 @@ const NavBar = () => {
                         {
                             navLinks.map((link) => (
                                 <li key={link.name}>
-                                    <NavLink to={link.path} className={({ isActive }) => isActive ? 'text-brand-gold font-semibold' : 'text-brand-ink'}>{link.name}</NavLink>
+                                    <NavLink to={link.path} className={({ isActive }) => isActive ? 'text-brand-gold font-semibold' : 'text-white '}>{link.name}</NavLink>
                                 </li>
                             ))
                         }
 
                     </ul>
                 </div>
-                <a className="btn btn-ghost bg-brand-gold text-xl text-brand-ink hover:text-brand-gold hover:bg-black ">PREMIUM FRAGRANCE</a>
+                <a href="/" className="btn btn-ghost bg-brand-gold sm:text-md md:text-lg text-brand-ink hover:text-brand-gold hover:bg-black ">PREMIUM FRAGRANCE</a>
             </div>
             <div className="navbar-center hidden lg:flex">
-                <ul className="menu menu-horizontal px-1">
+                <ul className="menu menu-horizontal px-1 text-lg">
                     {
                         navLinks.map((link) => (
                             <li key={link.name}>
-                                <NavLink to={link.path} className={({ isActive }) => isActive ? 'text-brand-gold font-semibold' : 'text-brand-ink'}>{link.name}</NavLink>
+                                <NavLink to={link.path} className={({ isActive }) => isActive ? 'text-brand-gold font-semibold' : 'text-brand-ink font-semibold'}>{link.name}</NavLink>
                             </li>
                         ))
                     }
                 </ul>
             </div>
-            <div className="navbar-end">
+            <div className="relative navbar-end">
                 {/* <NavLink to="/admin/dashboard" className="btn btn-outline border-brand-gold text-brand-ink hover:bg-brand-gold hover:border-brand-gold">Admin</NavLink> */}
                 <NavLink
                     to="/cart"
-                    className="btn btn-ghost text-brand-ink hover:text-brand-gold"
+                    className="btn text-brand-ink hover:text-brand-gold bg-white"
                     aria-label="Cart"
                 >
                     <ShoppingCart size={22} />
                 </NavLink>
-                <div className="badge ml-2 bg-brand-gold text-brand-ink border-0">{itemCount}</div>
+                <div className="absolute -top-2 badge ml-2 bg-brand-gold text-brand-ink border-0 rounded-full h-4 w-4 p-3 font-bold">{itemCount}</div>
             </div>
             </div>
         </div>

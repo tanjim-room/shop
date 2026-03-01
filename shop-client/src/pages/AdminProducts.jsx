@@ -1,35 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { adminApiFetch, uploadMultipleImagesToImgbb } from '../lib/api';
 import Swal from 'sweetalert2';
 import ProductEditForm from '../components/admin/ProductEditForm';
+import useBackendData from '../hooks/useBackendData';
 
 const AdminProducts = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [editingProduct, setEditingProduct] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [actionError, setActionError] = useState('');
 
-  const loadProducts = async () => {
-    try {
-      setError('');
-      const response = await adminApiFetch('/api/products');
-      if (!response.ok) throw new Error('Failed to load products');
-      const data = await response.json();
-      setProducts(data);
-    } catch (loadError) {
-      setError(loadError.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadProducts();
+  const loadProducts = useCallback(async () => {
+    const response = await adminApiFetch('/api/products');
+    if (!response.ok) throw new Error('Failed to load products');
+    return response.json();
   }, []);
+
+  const {
+    data: products = [],
+    setData: setProducts,
+    loading,
+    error,
+  } = useBackendData({
+    loader: loadProducts,
+    initialData: [],
+  });
 
   const handleDelete = async (id) => {
     const confirmation = await Swal.fire({
@@ -48,6 +45,7 @@ const AdminProducts = () => {
     }
 
     try {
+      setActionError('');
       const response = await adminApiFetch(`/api/products/${id}`, {
         method: 'DELETE',
       });
@@ -65,7 +63,7 @@ const AdminProducts = () => {
         confirmButtonColor: '#C7A64A',
       });
     } catch (deleteError) {
-      setError(deleteError.message);
+      setActionError(deleteError.message);
       Swal.fire({
         icon: 'error',
         title: 'Delete failed',
@@ -77,7 +75,7 @@ const AdminProducts = () => {
 
   const openEditPanel = (product) => {
     setSuccess('');
-    setError('');
+    setActionError('');
     setEditingProduct({
       ...product,
       imageUrls:
@@ -99,7 +97,7 @@ const AdminProducts = () => {
     if (!files.length) return;
 
     setUploading(true);
-    setError('');
+    setActionError('');
 
     try {
       const urls = await uploadMultipleImagesToImgbb(files);
@@ -108,7 +106,7 @@ const AdminProducts = () => {
         imageUrls: [...(prev.imageUrls || []), ...urls],
       }));
     } catch (uploadError) {
-      setError(uploadError.message);
+      setActionError(uploadError.message);
       Swal.fire({
         icon: 'error',
         title: 'Upload failed',
@@ -133,7 +131,7 @@ const AdminProducts = () => {
     if (!editingProduct?._id) return;
 
     setSaving(true);
-    setError('');
+    setActionError('');
     setSuccess('');
 
     try {
@@ -177,7 +175,7 @@ const AdminProducts = () => {
         confirmButtonColor: '#C7A64A',
       });
     } catch (updateError) {
-      setError(updateError.message);
+      setActionError(updateError.message);
       Swal.fire({
         icon: 'error',
         title: 'Update failed',
@@ -196,7 +194,7 @@ const AdminProducts = () => {
   return (
     <section className="space-y-4 text-slate-800">
       <h2 className="text-2xl font-bold mb-4 text-slate-900">Manage Products</h2>
-      {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
+      {(error || actionError) && <p className="text-red-600 text-sm mb-3">{actionError || error}</p>}
       {success && <p className="text-green-600 text-sm mb-3">{success}</p>}
 
       <ProductEditForm
